@@ -50,7 +50,6 @@ public class ChatRoom {
 				e.printStackTrace();
 			}
 		} else {
-			logger.info("Added {} to user connected." , username);
 			if(message.getType().equals(Constants.JOIN)) {
 				userConnected.add(username);
 			}
@@ -62,7 +61,7 @@ public class ChatRoom {
 			for (Session sessions : session.getOpenSessions()) {
 				try {
 					if (message.getType().equals(Constants.JOIN)) {
-						//logger.info("Join request from user {}" , username);
+						logger.info("Join request from user " , username);
 						Message msg = new Message(Constants.JOIN, Constants.EMPTY, message.getUsername(), dateTime);
 						session.getUserProperties().put("username", username);
 						sessions.getBasicRemote().sendObject(msg);
@@ -71,14 +70,9 @@ public class ChatRoom {
 						sessions.getBasicRemote().sendObject(msgTyping);
 					} else if (message.getType().equals(Constants.CHAT)) {
 						typingUsersList.add(username);
-						//logger.info("Chat request from user {}" , username);
 						Message msg = new Message(Constants.CHAT, message.getMessage(), username, dateTime);
 						sessions.getBasicRemote().sendObject(msg);
 					} else if(message.getType().equals("typing") || message.getType().equals("reset-typing")) {
-						//logger.debug(message.getUsername());
-						for(String s : typingUsersList) {
-							//logger.debug(s);
-						}
 						Message msg = new Message("typing", typingUsersList.toString(), "", "");
 						sessions.getBasicRemote().sendObject(msg);
 					}
@@ -99,7 +93,7 @@ public class ChatRoom {
 	@OnClose
 	public void close(Session session) {
 		String username = session.getUserProperties().get("username").toString();
-		logger.info("session closing for user : {}" , username);
+		logger.info("Session closing for user : " , username);
 		if (session.getUserProperties().containsKey("username")) {
 			typingUsersList.remove(username);
 			for (Session sessions : session.getOpenSessions()) {

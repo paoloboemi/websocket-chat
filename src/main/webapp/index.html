@@ -1,12 +1,14 @@
 <html>
 <head>
+<title>Web Chat</title>
 <link rel="stylesheet"
 	href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
 	integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
 	crossorigin="anonymous">
 <link rel="stylesheet" href="style.css">
-<link rel="stylesheet" href="https://pro.fontawesome.com/releases/v5.13.0/css/all.css">
-	
+<link rel="stylesheet"
+	href="https://pro.fontawesome.com/releases/v5.13.0/css/all.css">
+
 <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
 	integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
 	crossorigin="anonymous"></script>
@@ -34,8 +36,6 @@
 	}
 	
 	function onMessage(evt) {
-		console.log(username);
-		console.log(evt.data);
 		var response = JSON.parse(evt.data);
 		if (response.type === "join") {
 			$('#msg_history_custom').append('<div class="incoming_msg"><div class="received_msg"><div class="received_withd_msg"><p><b>' + response.username + "</b> join the chat." + '</p><span class="time_date">'+ response.date + '</span></div></div></div>');  
@@ -109,9 +109,6 @@
 			message.value = "";
 		}
 
-		console.log("prima dell'if");
-		console.log(message.value.length > 0);
-		console.log(evt.keyCode != 13);
 		var request = {};
 		request.username = username;
 		request.message = message.value;
@@ -151,36 +148,38 @@
 <body>
 
 	<div class="container">
-	<br>
+		<br>
 		<div class="row" id="joinTable">
 			<div class="col-md">
-				<input type="text" class="form-control" id="nickname" placeholder="Username" onkeyup="join(event);">
-				 <div class="col-md-4" id="userExist" style="display:none;">
-        			<small class="text-danger">
-        			 	Username esistente
-       			 	</small>      
-      			</div>
+				<input type="text" class="form-control" id="nickname"
+					placeholder="Username" onkeyup="join(event);">
+				<div class="col-md-4" id="userExist" style="display: none;">
+					<small class="text-danger"> Username esistente </small>
+				</div>
 			</div>
 			<div class="col-sm">
-				<button type="button" id="joinChat" class="msg_join_btn" onclick="join(event);">
+				<button type="button" id="joinChat" class="msg_join_btn"
+					onclick="join(event);">
 					<i class="fas fa-sign-out-alt" aria-hidden="true"></i>
 				</button>
 			</div>
 		</div>
 	</div>
-	
+
 	<div class="container">
-		<h3 class=" text-center">Casa Rubino Chat</h3>
+		<h3 class=" text-center">Chat</h3>
 		<div class="messaging">
 			<div class="inbox_msg">
 				<div class="mesgs">
-					<div class="msg_history" id="msg_history_custom">
-					</div>
+					<div class="msg_history" id="msg_history_custom"></div>
 					<span class="time_date" id="typingUsers"></span>
 					<div class="type_msg">
 						<div class="input_msg_write">
-							<input type="text" class="write_msg" id="message" placeholder="Type a message" onkeyup="sendMessage(event);" disabled/>
-							<button class="msg_send_btn" type="button" id="sendButton" onclick="sendMessage(event);" disabled>
+							<input type="text" class="write_msg" id="message"
+								placeholder="Type a message" onkeyup="sendMessage(event);"
+								disabled />
+							<button class="msg_send_btn" type="button" id="sendButton"
+								onclick="sendMessage(event);" disabled>
 								<i class="fab fa-telegram-plane" aria-hidden="true"></i>
 							</button>
 						</div>
@@ -188,13 +187,16 @@
 				</div>
 			</div>
 		</div>
-		<div class="list-group" id="onlineTab" style="display:none;">
-		  <p class="list-group-item list-group-item-action active" style="background-color: #05728f !important; border-color: #05728f !important;">Online users <span class="badge badge-light" id="onlineNumber">0</span></p>
-		  <p class="list-group-item list-group-item-action" id="userOnline"></p>
-	   </div>
+		<div class="list-group" id="onlineTab" style="display: none;">
+			<p class="list-group-item list-group-item-action active"
+				style="background-color: #05728f !important; border-color: #05728f !important;">
+				Online users <span class="badge badge-light" id="onlineNumber">0</span>
+			</p>
+			<p class="list-group-item list-group-item-action" id="userOnline"></p>
+		</div>
 	</div>
-	
-	
+
+
 
 </body>
 </html>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="warn">
+ 
+    <Appenders>
+        <RollingFile name="fileLogger" fileName="${sys:logfile.path}/chat.log" filePattern="${sys:logfile.path}/chat-%d{yyyy-MM-dd}.log">
+            <PatternLayout>
+                <pattern>[%-5level] %d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %c{1} - %msg%n</pattern>
+            </PatternLayout>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true" />
+            </Policies>
+        </RollingFile>
+ 
+    </Appenders>
+    <Loggers>
+        <Logger name="com.rubinochat" level="debug" additivity="true">
+            <appender-ref ref="fileLogger" level="debug" />
+        </Logger>
+    </Loggers>
+</Configuration>

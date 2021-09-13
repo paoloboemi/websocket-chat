@@ -1,1 +1,1 @@
-# websocket-chat
+# WebSocket Chat

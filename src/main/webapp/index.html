@@ -1,0 +1,200 @@
+<html>
+<head>
+<link rel="stylesheet"
+	href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+	integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+	crossorigin="anonymous">
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="https://pro.fontawesome.com/releases/v5.13.0/css/all.css">
+	
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+	integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+	crossorigin="anonymous"></script>
+<script
+	src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+	integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+	crossorigin="anonymous"></script>
+<script
+	src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+	integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+	crossorigin="anonymous"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<script type="text/javascript">
+	var websocket;
+	var textarea;
+	var username;
+	var messageArea;
+	var sendButton;
+
+	function connect() {
+		websocket = new WebSocket("ws://" + window.location.host + "/chat/chat");
+		textarea = document.getElementById("chatArea");
+		websocket.onmessage = onMessage;
+	}
+	
+	function onMessage(evt) {
+		console.log(username);
+		console.log(evt.data);
+		var response = JSON.parse(evt.data);
+		if (response.type === "join") {
+			$('#msg_history_custom').append('<div class="incoming_msg"><div class="received_msg"><div class="received_withd_msg"><p><b>' + response.username + "</b> join the chat." + '</p><span class="time_date">'+ response.date + '</span></div></div></div>');  
+			$('#userExist').hide();
+			$('#nickname').attr('disabled', 'disabled');
+			$('#joinChat').attr('disabled', 'disabled');
+			$('#onlineTab').show();
+		} else if (response.type === "chat") {
+			if(username === response.username){
+				$('#msg_history_custom').append('<div class="outgoing_msg"><div class="sent_msg"><p>' + response.message + '</p><span class="time_date">'+ response.date + '</span></div></div>');
+			} else{
+				$('#msg_history_custom').append('<div class="incoming_msg"><div class="received_msg"><div class="received_withd_msg"><p>' + response.message + '</p><span class="time_date"><b>' + response.username + "</b> | " + response.date + '</span></div></div></div>');		
+			}
+		} else if(response.type === "left"){
+			$('#msg_history_custom').append('<div class="incoming_msg"><div class="received_msg"><div class="received_withd_msg"><p><b>' + response.username + "</b> left the chat." + '</p><span class="time_date">' + response.date + '</span></div></div></div>');
+		} else if(response.type === "error"){
+			$('#userExist').show();
+			$('#nickname').removeAttr("disabled");
+			$('#joinChat').removeAttr("disabled");
+		} else if(response.type === "online"){
+			console.log(response.message);
+			var userList = response.message.slice(1, response.message.length - 1);
+			$('#userOnline').text(userList);
+			$('#onlineNumber').text(userList.split(',').length);
+		} else if(response.type === "typing"){
+			console.log(response);
+			console.log(response.message);
+			var typingUser = response.message.slice(1, response.message.length - 1).split(', ');
+			console.log("prima di cotains " + typingUser);
+			if(contains(typingUser, username)){
+				console.log("username contenuto");
+				console.log(typingUser);
+				var filteredList = typingUser.filter(item => item !== username);
+				console.log("Lista filtrata" + filteredList);
+				typingUser = filteredList;
+			}
+			if(typingUser.length > 1){
+				$('#typingUsers').text(typingUser + " stanno scrivendo...");
+			} else if(typingUser.length == 1 && typingUser[0] === ""){
+				$('#typingUsers').text("");
+			} else if(typingUser.length == 1 ){
+				$('#typingUsers').text(typingUser + " sta scrivendo...");
+			} else if(typingUser.length == 0){
+				$('#typingUsers').text("");
+			}
+			
+		}
+		
+		document.getElementById("msg_history_custom").scrollTop = 999999;
+	}
+	
+	function contains(array, element){
+		var found = false;
+		for(var i = 0; i < array.length; i++){
+			if(array[i] === element){
+				found = true;
+        		break;
+			}
+		}
+		return found;
+	}
+
+	function sendMessage(evt) {
+		var message = document.getElementById("message");
+		if ((evt.type == "click" || evt.keyCode === 13) && message.value.length > 0) {
+			var request = {};
+			request.username = username;
+			request.message = message.value;
+			request.type = "chat";
+			websocket.send(JSON.stringify(request));
+			message.value = "";
+		}
+
+		console.log("prima dell'if");
+		console.log(message.value.length > 0);
+		console.log(evt.keyCode != 13);
+		var request = {};
+		request.username = username;
+		request.message = message.value;
+		if(message.value.length > 0 && evt.keyCode != 13){
+			request.type = "typing";
+			websocket.send(JSON.stringify(request));
+		} else {
+			request.type = "reset-typing";
+			websocket.send(JSON.stringify(request));
+		}
+	}
+
+	function join(evt) {
+		var nickname = document.getElementById("nickname");
+		if ((evt.type == "click" || evt.keyCode === 13) && nickname.value.length > 0) {
+			connect();
+			websocket.onopen = function() {
+				var inputJoin = document.getElementById("joinChat");
+				var request = {};
+				username = nickname.value;
+				request.username = username;
+				request.message = "";
+				request.type = "join";
+				console.log(JSON.stringify(request));
+				websocket.send(JSON.stringify(request));
+				nickname.disabled = true;
+				inputJoin.disabled = true;
+				$("#message").removeAttr("disabled");
+				$("#sendButton").removeAttr("disabled");
+				$("#joinTable").hide();
+			};
+		}
+	}
+</script>
+
+</head>
+<body>
+
+	<div class="container">
+	<br>
+		<div class="row" id="joinTable">
+			<div class="col-md">
+				<input type="text" class="form-control" id="nickname" placeholder="Username" onkeyup="join(event);">
+				 <div class="col-md-4" id="userExist" style="display:none;">
+        			<small class="text-danger">
+        			 	Username esistente
+       			 	</small>      
+      			</div>
+			</div>
+			<div class="col-sm">
+				<button type="button" id="joinChat" class="msg_join_btn" onclick="join(event);">
+					<i class="fas fa-sign-out-alt" aria-hidden="true"></i>
+				</button>
+			</div>
+		</div>
+	</div>
+	
+	<div class="container">
+		<h3 class=" text-center">Casa Rubino Chat</h3>
+		<div class="messaging">
+			<div class="inbox_msg">
+				<div class="mesgs">
+					<div class="msg_history" id="msg_history_custom">
+					</div>
+					<span class="time_date" id="typingUsers"></span>
+					<div class="type_msg">
+						<div class="input_msg_write">
+							<input type="text" class="write_msg" id="message" placeholder="Type a message" onkeyup="sendMessage(event);" disabled/>
+							<button class="msg_send_btn" type="button" id="sendButton" onclick="sendMessage(event);" disabled>
+								<i class="fab fa-telegram-plane" aria-hidden="true"></i>
+							</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="list-group" id="onlineTab" style="display:none;">
+		  <p class="list-group-item list-group-item-action active" style="background-color: #05728f !important; border-color: #05728f !important;">Online users <span class="badge badge-light" id="onlineNumber">0</span></p>
+		  <p class="list-group-item list-group-item-action" id="userOnline"></p>
+	   </div>
+	</div>
+	
+	
+
+</body>
+</html>

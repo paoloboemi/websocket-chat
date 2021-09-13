@@ -25,9 +25,9 @@ import com.rubinochat.utility.Utility;
 @ServerEndpoint(value = "/chat", encoders = MessageEncoder.class, decoders = MessageDecoder.class)
 public class ChatRoom {
 
-	private static List<String> userConnected = new LinkedList<String>();
-	
 	private static final Logger logger = LogManager.getLogger(ChatRoom.class.getName());
+	
+	private static List<String> userConnected = new LinkedList<String>();
 	
 	private static LinkedHashSet<String> typingUsersList = new LinkedHashSet<String>();
 	
@@ -40,9 +40,9 @@ public class ChatRoom {
 	public void onMessage(Message message, Session session) {
 		String dateTime = Utility.getDateString();
 		String username = message.getUsername();
-		logger.info("Message recived : {}" + message.toString());
+		logger.info("Message recived : " + message.toString());
 		if (message.getType().equals("join") && userConnected.contains(username)) {
-			logger.error("User already in use : {}", username);
+			logger.error("User already in use : ", username);
 			try {
 				session.getBasicRemote().sendObject(new Message("error", "Utente già utilizzato", username, dateTime));
 				session.close();
